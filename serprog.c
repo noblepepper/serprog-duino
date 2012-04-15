@@ -64,7 +64,7 @@ void setup_uart( unsigned int bauds)
 void char_uart( unsigned char data )
 {
 	/* Wait for empty transmit buffer */
-	while ( !( UCSR0A & (1<<UDRE0)) );
+	loop_until_bit_is_set(UCSR0A, UDRE0);
 	/* Put data into buffer, sends the data */
 	UDR0 = data;
 }
