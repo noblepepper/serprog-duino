@@ -84,7 +84,7 @@ void handle_command(unsigned char command)
 			/* little endian */
 			char_uart(0b00000111);
 			char_uart(0b00000000);
-			char_uart(0b00000000);
+			char_uart(0b00000001);
 			char_uart(0b00000000);
 			break;
 		case S_CMD_Q_PGMNAME:
