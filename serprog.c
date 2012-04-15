@@ -43,6 +43,8 @@
 #define S_CMD_O_SPIOP           0x13            /* Perform SPI operation.                       */
 
 #define S_IFACE_VERSION		0x01		/* Version of the protocol */
+#define S_PGM_NAME		"serprog-duino" /* The program's name */
+#define S_SPEED			57600		/* Serial speed */
 
 void setup_uart( unsigned int bauds)
 {
@@ -67,8 +69,17 @@ void char_uart( unsigned char data )
 	UDR0 = data;
 }
 
+void word_uart(char * str)
+{
+        int i;
+        for (i=0;i<strlen(str);i++){
+                char_uart(str[i]);
+        }
+}
+
 void handle_command(unsigned char command)
 {
+	int i;
 	switch (command){
 		case S_CMD_NOP:
 			char_uart(S_ACK);
@@ -82,12 +93,17 @@ void handle_command(unsigned char command)
 		case S_CMD_Q_CMDMAP:
 			char_uart(S_ACK);
 			/* little endian */
-			char_uart(0b00000111);
+			char_uart(0b00001111);
 			char_uart(0b00000000);
 			char_uart(0b00000001);
 			char_uart(0b00000000);
 			break;
 		case S_CMD_Q_PGMNAME:
+			char_uart(S_ACK);
+			word_uart(S_PGM_NAME);
+			for (i=strlen(S_PGM_NAME);i<16;i++){
+				char_uart(0);
+			}
 			break;
 		case S_CMD_Q_SERBUF:
 			break;
