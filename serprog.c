@@ -147,15 +147,15 @@ void handle_command(unsigned char command)
 		case S_CMD_Q_WRNMAXLEN:
 			break;
 		case S_CMD_R_BYTE:
-			/* read from serial the 24 bit address */
-			/* read the byte from SPI */
+			/* TODO: read from serial the 24 bit address */
+			/* TODO: read the byte from SPI */
 			putchar_uart(S_ACK);
-			/* putchar_uart(byte) */
+			/* TODO: putchar_uart(byte) */
 			break;
 		case S_CMD_R_NBYTES:
 			break;
 		case S_CMD_O_INIT:
-			/* insert buffer initialization here */
+			/* TODO: insert buffer initialization here */
 			putchar_uart(S_ACK);
 			break;
 		case S_CMD_O_WRITEB:
