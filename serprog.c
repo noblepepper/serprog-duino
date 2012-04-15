@@ -61,7 +61,7 @@ void setup_uart( unsigned int bauds)
 	UCSR0C = (1<<USBS0)|(3<<UCSZ00);
 }
 
-void char_uart( unsigned char data )
+void putchar_uart( unsigned char data )
 {
 	/* Wait for empty transmit buffer */
 	loop_until_bit_is_set(UCSR0A, UDRE0);
@@ -69,12 +69,19 @@ void char_uart( unsigned char data )
 	UDR0 = data;
 }
 
+char getchar_uart(void)
+{
+	/* Wait for the char to arrive in the buffer */
+	loop_until_bit_is_set(UCSR0A, RXC0);
+	return UDR0;
+}
+
 void word_uart(char * str)
 {
-        int i;
-        for (i=0;i<strlen(str);i++){
-                char_uart(str[i]);
-        }
+	int i;
+	for (i=0;i<strlen(str);i++){
+		putchar_uart(str[i]);
+	}
 }
 
 void handle_command(unsigned char command)
@@ -82,27 +89,27 @@ void handle_command(unsigned char command)
 	int i;
 	switch (command){
 		case S_CMD_NOP:
-			char_uart(S_ACK);
+			putchar_uart(S_ACK);
 			break;
 		case S_CMD_Q_IFACE:
-			char_uart(S_ACK);
-                        char_uart(S_IFACE_VERSION);
-                        /* little endian multibyte value to complete to 16bit */
-                        char_uart(0);
+			putchar_uart(S_ACK);
+			putchar_uart(S_IFACE_VERSION);
+			/* little endian multibyte value to complete to 16bit */
+			putchar_uart(0);
 			break;
 		case S_CMD_Q_CMDMAP:
-			char_uart(S_ACK);
+			putchar_uart(S_ACK);
 			/* little endian */
-			char_uart(0b00001111);
-			char_uart(0b00000000);
-			char_uart(0b00000001);
-			char_uart(0b00000000);
+			putchar_uart(0b00001111);
+			putchar_uart(0b00000000);
+			putchar_uart(0b00000001);
+			putchar_uart(0b00000000);
 			break;
 		case S_CMD_Q_PGMNAME:
-			char_uart(S_ACK);
+			putchar_uart(S_ACK);
 			word_uart(S_PGM_NAME);
 			for (i=strlen(S_PGM_NAME);i<16;i++){
-				char_uart(0);
+				putchar_uart(0);
 			}
 			break;
 		case S_CMD_Q_SERBUF:
@@ -116,10 +123,16 @@ void handle_command(unsigned char command)
 		case S_CMD_Q_WRNMAXLEN:
 			break;
 		case S_CMD_R_BYTE:
+			/* read from serial the 24 bit address */
+			/* read the byte from SPI */
+			putchar_uart(S_ACK);
+			/* putchar_uart(byte) */
 			break;
 		case S_CMD_R_NBYTES:
 			break;
 		case S_CMD_O_INIT:
+			/* insert buffer initialization here */
+			putchar_uart(S_ACK);
 			break;
 		case S_CMD_O_WRITEB:
 			break;
@@ -130,8 +143,8 @@ void handle_command(unsigned char command)
 		case S_CMD_O_EXEC:
 			break;
 		case S_CMD_SYNCNOP:
-			char_uart(S_NAK);
-			char_uart(S_ACK);
+			putchar_uart(S_NAK);
+			putchar_uart(S_ACK);
 			break;
 		case S_CMD_Q_RDNMAXLEN:
 			break;
