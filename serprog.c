@@ -46,6 +46,9 @@
 #define S_PGM_NAME		"serprog-duino" /* The program's name */
 #define S_SPEED			57600		/* Serial speed */
 
+/* global variables */
+char addr[3];
+
 void setup_uart( unsigned int bauds)
 {
 
@@ -83,6 +86,27 @@ void word_uart(char * str)
 		putchar_uart(str[i]);
 	}
 }
+
+/* get addresses in big endian */
+void getaddr_be(void)
+{
+	int i;
+
+	for (i=2;i>=0;i--){
+		addr[i] = getchar_uart();
+	}
+}
+
+/* get addresses in little endian */
+void getaddr_le(void)
+{
+        int i;
+
+        for (i=0;i<3;i++){
+                addr[i] = getchar_uart();
+        }
+}
+
 
 void handle_command(unsigned char command)
 {
