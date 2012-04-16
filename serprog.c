@@ -82,6 +82,22 @@ void setup_spi(void)
 	SPI_PORT = (0<<SS);
 }
 
+void transmit_spi(char c)
+{
+	/* transmit c on the SPI bus */
+	SPDR = c;
+	/* Wait for the transmission to be comlpeted */
+	loop_until_bit_is_set(SPSR,SPIF);
+}
+
+char receive_spi(void)
+{
+	/* Wait for reception complete */
+	loop_until_bit_is_set(SPSR,SPIF);
+	/* Return Data Register */
+	return SPDR;
+}
+
 void putchar_uart( unsigned char data )
 {
 	/* Wait for empty transmit buffer */
