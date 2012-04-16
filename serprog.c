@@ -42,6 +42,13 @@
 #define S_CMD_S_BUSTYPE         0x12            /* Set used bustype(s).                         */
 #define S_CMD_O_SPIOP           0x13            /* Perform SPI operation.                       */
 
+#define SPI_PORT PORTB
+#define SCK PORTB5
+#define MISO PORTB4
+#define MOSI PORTB3
+#define SS PORTB2
+#define DDR_SPI DDRB
+
 #define S_IFACE_VERSION		0x01		/* Version of the protocol */
 #define S_PGM_NAME		"serprog-duino" /* The program's name */
 #define S_SPEED			57600		/* Serial speed */
@@ -62,6 +69,17 @@ void setup_uart( unsigned int bauds)
 	UCSR0B = (1<<RXEN0)|(1<<TXEN0)|(1<<TXCIE0)|(1<<RXCIE0);
 	/* Set frame format: 8data, 2stop bit */
 	UCSR0C = (1<<USBS0)|(3<<UCSZ00);
+}
+
+void setup_spi(void)
+{
+	/* Enable MOSI,SCK,SS as output like on
+	http://en.wikipedia.org/wiki/File:SPI_single_slave.svg */
+	DDR_SPI = (1<<MOSI)|(1<<SCK)|(1<<SS);
+	/* Enable SPI Master, set the clock to F_CPU / 16 */
+	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
+	/* Hold SS low for enabling the slave of the BIOS chip */
+	SPI_PORT = (0<<SS);
 }
 
 void putchar_uart( unsigned char data )
@@ -155,6 +173,7 @@ void handle_command(unsigned char command)
 		case S_CMD_R_NBYTES:
 			break;
 		case S_CMD_O_INIT:
+			setup_spi();
 			/* TODO: insert buffer initialization here */
 			putchar_uart(S_ACK);
 			break;
