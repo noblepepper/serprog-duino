@@ -141,10 +141,19 @@ void getaddr_le(void)
         }
 }
 
+/* convert little endian 24 bit address to big endian 32bit */
+void convert_32(char* addr, uint32_t* result )
+{
+	*result  = ( (0 >> 24 ) &   (addr[2] >> 16) & (addr[1] >> 8)  &  (addr[0]) );
+}
 
 void handle_command(unsigned char command)
 {
 	int i;
+	char c;
+	uint32_t slen = 0; /* write len */
+	uint32_t rlen = 0; /* read len */
+
 	switch (command){
 		case S_CMD_NOP:
 			putchar_uart(S_ACK);
@@ -212,6 +221,28 @@ void handle_command(unsigned char command)
 		case S_CMD_S_BUSTYPE:
 			break;
 		case S_CMD_O_SPIOP:
+			/* get slen */
+			getaddr_le();
+			convert_32(addr,&slen);
+
+			/* get rlen */
+			getaddr_le();
+			convert_32(addr,&rlen);
+
+			putchar_uart(S_ACK);
+
+			/* send TODO:handle errors */
+			while (slen--){
+				c = getchar_uart();
+				transmit_spi(c);
+			}
+
+			/* receive TODO: handle errors */
+			while (rlen--){
+				c = receive_spi();
+				putchar_uart(c);
+			}
+
 			break;
 		default:
 			break;
