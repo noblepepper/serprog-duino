@@ -167,10 +167,12 @@ void handle_command(unsigned char command)
 		case S_CMD_Q_CMDMAP:
 			putchar_uart(S_ACK);
 			/* little endian */
-			putchar_uart(0b00001111);
+			putchar_uart(0b00101111);
 			putchar_uart(0b00000000);
 			putchar_uart(0b00001001);
-			putchar_uart(0b00000000);
+			for (i=0;i<29;i++){
+				putchar_uart(0x0);
+			}
 			break;
 		case S_CMD_Q_PGMNAME:
 			putchar_uart(S_ACK);
@@ -182,6 +184,8 @@ void handle_command(unsigned char command)
 		case S_CMD_Q_SERBUF:
 			break;
 		case S_CMD_Q_BUSTYPE:
+			putchar_uart(S_ACK);
+			putchar_uart(0b00001000);
 			break;
 		case S_CMD_Q_CHIPSIZE:
 			break;
