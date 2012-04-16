@@ -53,9 +53,6 @@
 #define S_PGM_NAME		"serprog-duino" /* The program's name */
 #define S_SPEED			57600		/* Serial speed */
 
-/* global variables */
-volatile char addr[3];
-
 void setup_uart( unsigned int bauds)
 {
 
@@ -122,29 +119,12 @@ void word_uart(char * str)
 }
 
 /* get addresses in big endian */
-void getaddr_be(void)
+void getaddr_be(uint32_t* addr)
 {
-	int i;
-
-	for (i=2;i>=0;i--){
-		addr[i] = getchar_uart();
-	}
-}
-
-/* get addresses in little endian */
-void getaddr_le(void)
-{
-        int i;
-
-        for (i=0;i<3;i++){
-                addr[i] = getchar_uart();
-        }
-}
-
-/* convert little endian 24 bit address to big endian 32bit */
-void convert_32(char* addr, uint32_t* result )
-{
-	*result  = ( (0 >> 24 ) &   (addr[2] >> 16) & (addr[1] >> 8)  &  (addr[0]) );
+	*addr = getchar_uart() << 0;
+	*addr |= getchar_uart() << 8;
+	*addr |= getchar_uart() << 16;
+	*addr |= 0 << 24;
 }
 
 void handle_command(unsigned char command)
@@ -194,19 +174,10 @@ void handle_command(unsigned char command)
 		case S_CMD_Q_WRNMAXLEN:
 			break;
 		case S_CMD_R_BYTE:
-#if 0
-			/* TODO: read from serial the 24 bit address */
-			/* TODO: read the byte from SPI */
-			putchar_uart(S_ACK);
-			/* TODO: putchar_uart(byte) */
-#endif
 			break;
 		case S_CMD_R_NBYTES:
 			break;
 		case S_CMD_O_INIT:
-			setup_spi();
-			/* TODO: insert buffer initialization here */
-			putchar_uart(S_ACK);
 			break;
 		case S_CMD_O_WRITEB:
 			break;
@@ -226,27 +197,19 @@ void handle_command(unsigned char command)
 			break;
 		case S_CMD_O_SPIOP:
 			/* get slen */
-			getaddr_le();
-			convert_32(addr,&slen);
-
+			getaddr_be(&slen);
 			/* get rlen */
-			getaddr_le();
-			convert_32(addr,&rlen);
-
-			putchar_uart(S_ACK);
-
+			getaddr_be(&rlen);
 			/* send TODO:handle errors */
 			while (slen--){
 				c = getchar_uart();
 				transmit_spi(c);
 			}
-
+			putchar_uart(S_ACK);
 			/* receive TODO: handle errors */
 			while (rlen--){
-				c = receive_spi();
-				putchar_uart(c);
+				putchar_uart(receive_spi());
 			}
-
 			break;
 		default:
 			break;
@@ -261,6 +224,7 @@ ISR(USART_RX_vect)
 int main (void)
 {
 	setup_uart(57600);
+	setup_spi();
 	sei(); //enable interupts
 
 	while (1)
