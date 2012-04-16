@@ -131,7 +131,6 @@ void handle_command(unsigned char command)
 	char c;
 	uint32_t slen = 0; /* write len */
 	uint32_t rlen = 0; /* read len */
-	char * array;
 	switch (command){
 		case S_CMD_NOP:
 			putchar_uart(S_ACK);
