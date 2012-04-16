@@ -54,7 +54,7 @@
 #define S_SPEED			57600		/* Serial speed */
 
 /* global variables */
-char addr[3];
+volatile char addr[3];
 
 void setup_uart( unsigned int bauds)
 {
