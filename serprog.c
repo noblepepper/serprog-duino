@@ -43,17 +43,17 @@
 #define S_CMD_O_SPIOP           0x13            /* Perform SPI operation.                       */
 
 #define SPI_PORT PORTB
-#define SCK PORTB5
-#define MISO PORTB4
-#define MOSI PORTB3
-#define SS PORTB2
+#define SCK PORTB5 /* port 13 */
+#define MISO PORTB4 /* port 12 */
+#define MOSI PORTB3 /* port 11 */
+#define SS PORTB2 /* port 10 */
 #define DDR_SPI DDRB
 
 #define S_IFACE_VERSION		0x01		/* Version of the protocol */
 #define S_PGM_NAME		"serprog-duino" /* The program's name */
 #define S_SPEED			57600		/* Serial speed */
 
-void setup_uart( unsigned int bauds)
+void setup_uart( unsigned int bauds )
 {
 
 	int freq = F_CPU / 16 / bauds -1;
@@ -72,11 +72,15 @@ void setup_spi(void)
 {
 	/* Enable MOSI,SCK,SS as output like on
 	http://en.wikipedia.org/wiki/File:SPI_single_slave.svg */
-	DDR_SPI = (1<<MOSI)|(1<<SCK)|(1<<SS);
+	DDR_SPI = (1<<MOSI)|(1<<SCK)|(1<<SS)|(0<<MISO);
 	/* Enable SPI Master, set the clock to F_CPU / 16 */
-	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
+	/* CPOL and CPHA are 0 for SPI mode 0 (see wikipedia) */
+	/* we use mode 0 like for the linux spi in flashrom*/
+	SPCR = (1<<SPE)|(1<<MSTR)|(0<<CPOL)|(0<<CPHA);
+	SPSR = (1<<SPI2X);
 	/* Hold SS low for enabling the slave of the BIOS chip */
 	SPI_PORT = (0<<SS);
+	/* Mode 0 */
 }
 
 void transmit_spi(char c)
@@ -89,10 +93,12 @@ void transmit_spi(char c)
 
 char receive_spi(void)
 {
+	unsigned char c;
 	/* Wait for reception complete */
 	loop_until_bit_is_set(SPSR,SPIF);
 	/* Return Data Register */
-	return SPDR;
+	c = SPDR;
+	return c;
 }
 
 void putchar_uart( unsigned char data )
@@ -225,7 +231,7 @@ int main (void)
 {
 	setup_uart(57600);
 	setup_spi();
-	sei(); //enable interupts
+	sei(); /* enable interupts */
 
 	while (1)
 	{
