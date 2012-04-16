@@ -18,6 +18,7 @@
 #include <util/delay.h>
 #include <string.h>
 #include <avr/interrupt.h>
+#include <stdlib.h>
 
 #define S_ACK 0x06
 #define S_NAK 0x15
@@ -76,29 +77,20 @@ void setup_spi(void)
 	/* Enable SPI Master, set the clock to F_CPU / 16 */
 	/* CPOL and CPHA are 0 for SPI mode 0 (see wikipedia) */
 	/* we use mode 0 like for the linux spi in flashrom*/
-	SPCR = (1<<SPE)|(1<<MSTR)|(0<<CPOL)|(0<<CPHA);
+	SPCR = (1<<SPE)|(1<<MSTR)|(0<<CPOL)|(0<<CPHA)|(1<<SPIE)|(0<<DORD);
 	SPSR = (1<<SPI2X);
 	/* Hold SS low for enabling the slave of the BIOS chip */
 	SPI_PORT = (0<<SS);
 	/* Mode 0 */
 }
 
-void transmit_spi(char c)
+char readwrite_spi(char c)
 {
 	/* transmit c on the SPI bus */
 	SPDR = c;
 	/* Wait for the transmission to be comlpeted */
 	loop_until_bit_is_set(SPSR,SPIF);
-}
-
-char receive_spi(void)
-{
-	unsigned char c;
-	/* Wait for reception complete */
-	loop_until_bit_is_set(SPSR,SPIF);
-	/* Return Data Register */
-	c = SPDR;
-	return c;
+	return SPDR;
 }
 
 void putchar_uart( unsigned char data )
@@ -139,7 +131,7 @@ void handle_command(unsigned char command)
 	char c;
 	uint32_t slen = 0; /* write len */
 	uint32_t rlen = 0; /* read len */
-
+	char * array;
 	switch (command){
 		case S_CMD_NOP:
 			putchar_uart(S_ACK);
@@ -206,15 +198,16 @@ void handle_command(unsigned char command)
 			getaddr_be(&slen);
 			/* get rlen */
 			getaddr_be(&rlen);
-			/* send TODO:handle errors */
+
+			/* SPI is configured in little endian */
 			while (slen--){
 				c = getchar_uart();
-				transmit_spi(c);
+				readwrite_spi(c);
 			}
 			putchar_uart(S_ACK);
 			/* receive TODO: handle errors */
 			while (rlen--){
-				putchar_uart(receive_spi());
+				putchar_uart(readwrite_spi(0x0));
 			}
 			break;
 		default:
