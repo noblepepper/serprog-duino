@@ -79,9 +79,6 @@ void setup_spi(void)
 	/* we use mode 0 like for the linux spi in flashrom*/
 	SPCR = (1<<SPE)|(1<<MSTR)|(0<<CPOL)|(0<<CPHA)|(1<<SPIE)|(0<<DORD);
 	SPSR = (1<<SPI2X);
-	/* Hold SS low for enabling the slave of the BIOS chip */
-	SPI_PORT = (0<<SS);
-	/* Mode 0 */
 }
 
 char readwrite_spi(char c)
