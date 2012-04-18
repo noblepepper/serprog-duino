@@ -83,11 +83,13 @@ void setup_spi(void)
 
 char readwrite_spi(char c)
 {
+	char r;
 	/* transmit c on the SPI bus */
 	SPDR = c;
 	/* Wait for the transmission to be comlpeted */
 	loop_until_bit_is_set(SPSR,SPIF);
-	return SPDR;
+	r = SPDR;
+	return r;
 }
 
 void putchar_uart( unsigned char data )
