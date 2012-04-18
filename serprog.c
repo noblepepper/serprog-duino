@@ -116,10 +116,10 @@ void word_uart(char * str)
 /* get addresses in big endian */
 void getaddr_be(uint32_t* addr)
 {
-	*addr = getchar_uart() << 0;
-	*addr |= getchar_uart() << 8;
-	*addr |= getchar_uart() << 16;
-	*addr |= 0 << 24;
+	*addr = (uint32_t)getchar_uart() << 0;
+	*addr |= (uint32_t)getchar_uart() << 8;
+	*addr |= (uint32_t)getchar_uart() << 16;
+	*addr |= 0L << 24;
 }
 
 void handle_command(unsigned char command)
