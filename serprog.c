@@ -114,12 +114,15 @@ void word_uart(char * str)
 }
 
 /* get addresses in big endian */
-void getaddr_be(uint32_t* addr)
+uint32_t getaddr_be()
 {
-	*addr = (uint32_t)getchar_uart() << 0;
-	*addr |= (uint32_t)getchar_uart() << 8;
-	*addr |= (uint32_t)getchar_uart() << 16;
-	*addr |= 0L << 24;
+	uint32_t addr = 0;
+
+	addr = (uint32_t)getchar_uart() << 0;
+	addr |= (uint32_t)getchar_uart() << 8;
+	addr |= (uint32_t)getchar_uart() << 16;
+
+	return addr;
 }
 
 void handle_command(unsigned char command)
@@ -194,9 +197,9 @@ void handle_command(unsigned char command)
 			break;
 		case S_CMD_O_SPIOP:
 			/* get slen */
-			getaddr_be(&slen);
+			slen = getaddr_be();
 			/* get rlen */
-			getaddr_be(&rlen);
+			rlen = getaddr_be();
 
 			/* SPI is configured in little endian */
 			while (slen--){
