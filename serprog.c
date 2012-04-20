@@ -69,6 +69,15 @@ void setup_uart( unsigned int bauds )
 	UCSR0C = (1<<USBS0)|(3<<UCSZ00);
 }
 
+void select_chip(void)
+{
+	SPI_PORT &= ~(1<<SS);
+}
+
+void unselect_chip(void)
+{
+	SPI_PORT |= (1<<SS);
+}
 void setup_spi(void)
 {
 	/* set SS low */
@@ -206,6 +215,7 @@ void handle_command(unsigned char command)
 			/* get rlen */
 			rlen = getaddr_be();
 
+			select_chip();
 			/* SPI is configured in little endian */
 			while (slen--){
 				c = getchar_uart();
@@ -216,6 +226,7 @@ void handle_command(unsigned char command)
 			while (rlen--){
 				putchar_uart(readwrite_spi(0x0));
 			}
+			unselect_chip();
 			break;
 		default:
 			break;
