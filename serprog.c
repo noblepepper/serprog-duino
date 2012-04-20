@@ -71,6 +71,8 @@ void setup_uart( unsigned int bauds )
 
 void setup_spi(void)
 {
+	/* set SS low */
+	SPI_PORT &= ~(1<<SS);
 	/* Enable MOSI,SCK,SS as output like on
 	http://en.wikipedia.org/wiki/File:SPI_single_slave.svg */
 	DDR_SPI = (1<<MOSI)|(1<<SCK)|(1<<SS)|(0<<MISO);
@@ -84,6 +86,7 @@ void setup_spi(void)
 char readwrite_spi(char c)
 {
 	char r;
+
 	/* transmit c on the SPI bus */
 	SPDR = c;
 	/* Wait for the transmission to be comlpeted */
