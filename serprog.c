@@ -61,7 +61,7 @@ void setup_uart( unsigned long bauds )
 	/* Set baud rate */
 	UBRR0H = (unsigned char)(freq>>8);
 	UBRR0L = (unsigned char)freq;
-	/* Disable baud rate doubler */
+	/* Enable baud rate doubler */
 	UCSR0A |= (1<<U2X0);
 	/* Enable receiver and transmitter */
 	UCSR0B = (1<<RXEN0)|(1<<TXEN0)|(1<<TXCIE0)|(1<<RXCIE0);
