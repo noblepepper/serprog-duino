@@ -62,7 +62,7 @@ void setup_uart( unsigned int bauds )
 	UBRR0H = (unsigned char)(freq>>8);
 	UBRR0L = (unsigned char)freq;
 	/* Disable baud rate doubler */
-	UCSR0A = (0<<U2X0);
+	UCSR0A &= ~(1<<U2X0);
 	/* Enable receiver and transmitter */
 	UCSR0B = (1<<RXEN0)|(1<<TXEN0)|(1<<TXCIE0)|(1<<RXCIE0);
 	/* Set frame format: 8data, 2stop bit */
@@ -84,11 +84,11 @@ void setup_spi(void)
 	SPI_PORT &= ~(1<<SS);
 	/* Enable MOSI,SCK,SS as output like on
 	http://en.wikipedia.org/wiki/File:SPI_single_slave.svg */
-	DDR_SPI = (1<<MOSI)|(1<<SCK)|(1<<SS)|(0<<MISO);
+	DDR_SPI = (1<<MOSI)|(1<<SCK)|(1<<SS)&~(1<<MISO);
 	/* Enable SPI Master, set the clock to F_CPU / 16 */
 	/* CPOL and CPHA are 0 for SPI mode 0 (see wikipedia) */
 	/* we use mode 0 like for the linux spi in flashrom*/
-	SPCR = (1<<SPE)|(1<<MSTR)|(0<<CPOL)|(0<<CPHA)|(1<<SPIE)|(0<<DORD);
+	SPCR = (1<<SPE)|(1<<MSTR)&~(1<<CPOL)&~(1<<CPHA)|(1<<SPIE)&~(1<<DORD);
 	SPSR = (1<<SPI2X);
 }
 
