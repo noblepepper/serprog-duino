@@ -88,7 +88,7 @@ void setup_spi(void)
 	/* Enable SPI Master, set the clock to F_CPU / 16 */
 	/* CPOL and CPHA are 0 for SPI mode 0 (see wikipedia) */
 	/* we use mode 0 like for the linux spi in flashrom*/
-	SPCR = (1<<SPE)|(1<<MSTR)&~(1<<CPOL)&~(1<<CPHA)|(1<<SPIE)&~(1<<DORD);
+	SPCR = (1<<SPE)|(1<<MSTR)&~(1<<CPOL)&~(1<<CPHA)|(1<<SPIE)&~(1<<DORD)&~(1<<SPR0)&~(1<<SPR1);
 	SPSR = (1<<SPI2X);
 }
 
