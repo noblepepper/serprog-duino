@@ -54,15 +54,15 @@
 #define S_PGM_NAME		"serprog-duino" /* The program's name */
 #define S_SPEED			57600		/* Serial speed */
 
-void setup_uart( unsigned int bauds )
+void setup_uart( unsigned long bauds )
 {
 
-	int freq = F_CPU / 16 / bauds -1;
+	int freq = (F_CPU / 4 / bauds -1) /2 ;
 	/* Set baud rate */
 	UBRR0H = (unsigned char)(freq>>8);
 	UBRR0L = (unsigned char)freq;
 	/* Disable baud rate doubler */
-	UCSR0A &= ~(1<<U2X0);
+	UCSR0A |= (1<<U2X0);
 	/* Enable receiver and transmitter */
 	UCSR0B = (1<<RXEN0)|(1<<TXEN0)|(1<<TXCIE0)|(1<<RXCIE0);
 	/* Set frame format: 8data, 2stop bit */
@@ -240,7 +240,7 @@ ISR(USART_RX_vect)
 
 int main (void)
 {
-	setup_uart(57600);
+	setup_uart(115200);
 	setup_spi();
 	sei(); /* enable interupts */
 
