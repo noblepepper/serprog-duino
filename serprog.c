@@ -63,10 +63,10 @@ void setup_uart( unsigned long bauds )
 	UBRR0L = (unsigned char)freq;
 	/* Enable baud rate doubler */
 	UCSR0A |= (1<<U2X0);
-	/* Enable receiver and transmitter */
-	UCSR0B = (1<<RXEN0)|(1<<TXEN0)|(1<<TXCIE0)|(1<<RXCIE0);
-	/* Set frame format: 8data, 2stop bit */
-	UCSR0C = (1<<USBS0)|(3<<UCSZ00);
+	/* Enable receiver, transmitter and RX interrupt enable */
+	UCSR0B = (1<<RXEN0)|(1<<TXEN0)|(1<<RXCIE0);
+	/* Set frame format: 8data, 1stop bit */
+	UCSR0C = (3<<UCSZ00);
 }
 
 void select_chip(void)
@@ -85,11 +85,10 @@ void setup_spi(void)
 	/* Enable MOSI,SCK,SS as output like on
 	http://en.wikipedia.org/wiki/File:SPI_single_slave.svg */
 	DDR_SPI = (1<<MOSI)|(1<<SCK)|(1<<SS)&~(1<<MISO);
-	/* Enable SPI Master, set the clock to F_CPU / 16 */
+	/* Enable SPI Master, set the clock to F_CPU / 8 */
 	/* CPOL and CPHA are 0 for SPI mode 0 (see wikipedia) */
 	/* we use mode 0 like for the linux spi in flashrom*/
-	SPCR = (1<<SPE)|(1<<MSTR)&~(1<<CPOL)&~(1<<CPHA)|(1<<SPIE)&~(1<<DORD)&~(1<<SPR0)&~(1<<SPR1);
-	SPSR = (1<<SPI2X);
+	SPCR = (1<<SPE)|(1<<MSTR)&~(1<<CPOL)&~(1<<CPHA)|(1<<SPIE)&~(1<<DORD)&~(1<<SPR0);
 }
 
 char readwrite_spi(char c)
@@ -109,6 +108,7 @@ void putchar_uart( unsigned char data )
 	/* Wait for empty transmit buffer */
 	loop_until_bit_is_set(UCSR0A, UDRE0);
 	/* Put data into buffer, sends the data */
+	_delay_us(10); //8us mostly stable, 10us to be sure
 	UDR0 = data;
 }
 
@@ -240,7 +240,7 @@ ISR(USART_RX_vect)
 
 int main (void)
 {
-	setup_uart(115200);
+	setup_uart(2000000);
 	setup_spi();
 	sei(); /* enable interupts */
 

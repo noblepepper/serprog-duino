@@ -8,11 +8,10 @@ BIN_FORMAT=ihex
 
 PORT=/dev/ttyACM0
 BAUD=115200
-PROTOCOL=stk500v1
+PROTOCOL=arduino
 PART=$(MCU)
 AVRDUDE=avrdude -F -V
-
-AVRSIZE=avr-size -C --mcu=$(MCU)
+AVRSIZE=avr-size -A
 
 RM=rm -f
 
