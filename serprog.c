@@ -84,11 +84,12 @@ void setup_spi(void)
 	SPI_PORT &= ~(1<<SS);
 	/* Enable MOSI,SCK,SS as output like on
 	http://en.wikipedia.org/wiki/File:SPI_single_slave.svg */
-	DDR_SPI = (1<<MOSI)|(1<<SCK)|(1<<SS)&~(1<<MISO);
-	/* Enable SPI Master, set the clock to F_CPU / 8 */
+	DDR_SPI = (1<<MOSI)|(1<<SCK)|(1<<SS);
+	/* Enable SPI Master, set the clock to F_CPU / 2 */
 	/* CPOL and CPHA are 0 for SPI mode 0 (see wikipedia) */
 	/* we use mode 0 like for the linux spi in flashrom*/
-	SPCR = (1<<SPE)|(1<<MSTR)&~(1<<CPOL)&~(1<<CPHA)|(1<<SPIE)&~(1<<DORD)&~(1<<SPR0);
+	SPCR = (1<<SPE)|(1<<MSTR);
+    SPSR = (1<<SPI2X);
 }
 
 char readwrite_spi(char c)
