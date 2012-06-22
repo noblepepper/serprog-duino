@@ -1,4 +1,4 @@
-/*    Copyright (C) 2012  Denis 'GNUtoo' Carikli <GNUtoo@no-log.org>
+/*   Copyright (C) 2012  Denis 'GNUtoo' Carikli <GNUtoo@no-log.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ void setup_spi(void)
 	/* CPOL and CPHA are 0 for SPI mode 0 (see wikipedia) */
 	/* we use mode 0 like for the linux spi in flashrom*/
 	SPCR = (1<<SPE)|(1<<MSTR);
-    SPSR = (1<<SPI2X);
+	SPSR = (1<<SPI2X);
 }
 
 char readwrite_spi(char c)
