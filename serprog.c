@@ -175,8 +175,8 @@ void handle_command(unsigned char command)
 			break;
 		case S_CMD_Q_SERBUF:
 			putchar_uart(S_ACK);
-			putchar_uart(0x00);
-			putchar_uart(0x00);
+			putchar_uart(0xFF);
+			putchar_uart(0xFF);
 			break;
 		case S_CMD_Q_BUSTYPE:
 			putchar_uart(S_ACK);
