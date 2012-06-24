@@ -143,16 +143,16 @@ void word_uart(char * str)
 	}
 }
 
-/* get addresses in big endian */
-uint32_t getaddr_be()
+/* get 24bit values in little endian */
+uint32_t get24_le()
 {
-	uint32_t addr = 0;
+	uint32_t val = 0;
 
-	addr = (uint32_t)getchar_uart() << 0;
-	addr |= (uint32_t)getchar_uart() << 8;
-	addr |= (uint32_t)getchar_uart() << 16;
+	val = (uint32_t)getchar_uart() << 0;
+	val |= (uint32_t)getchar_uart() << 8;
+	val |= (uint32_t)getchar_uart() << 16;
 
-	return addr;
+	return val;
 }
 
 void handle_command(unsigned char command)
@@ -227,9 +227,9 @@ void handle_command(unsigned char command)
 			break;
 		case S_CMD_O_SPIOP:
 			/* get slen */
-			slen = getaddr_be();
+			slen = get24_le();
 			/* get rlen */
-			rlen = getaddr_be();
+			rlen = get24_le();
 
 			select_chip();
 			/* SPI is configured in little endian */
