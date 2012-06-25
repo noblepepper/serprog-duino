@@ -226,6 +226,7 @@ void handle_command(unsigned char command)
 		case S_CMD_S_BUSTYPE:
 			break;
 		case S_CMD_O_SPIOP:
+			cli();
 			/* get slen */
 			slen = get24_le();
 			/* get rlen */
@@ -243,6 +244,7 @@ void handle_command(unsigned char command)
 				putchar_uart(readwrite_spi(0x0));
 			}
 			unselect_chip();
+			sei();
 			break;
 		default:
 			break;
