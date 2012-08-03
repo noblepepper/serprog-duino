@@ -66,8 +66,10 @@
 	| (1<<S_CMD_Q_PGMNAME) | (1<<S_CMD_Q_SERBUF) | (1<<S_CMD_Q_BUSTYPE) \
         ) & 0xff)
 #define SUPPORTED_COMMANDS_HIGH ( ( ( \
-	(1<<(S_CMD_SYNCNOP - 16)) | (1<<(S_CMD_O_SPIOP - 16)) \
+	(1<<(S_CMD_SYNCNOP - 16)) | (1<<(S_CMD_O_SPIOP - 16)) | (1<<(S_CMD_S_BUSTYPE - 16)) \
 	) & 0xff ) )
+
+#define SUPPORTED_BUS 0x08
 
 void setup_uart( unsigned long bauds )
 {
@@ -224,6 +226,14 @@ void handle_command(unsigned char command)
 		case S_CMD_Q_RDNMAXLEN:
 			break;
 		case S_CMD_S_BUSTYPE:
+			switch (getchar_uart()) {
+				case SUPPORTED_BUS:
+					putchar_uart(S_ACK);
+					break;
+				default:
+					putchar_uart(S_NAK);
+					break;
+			}
 			break;
 		case S_CMD_O_SPIOP:
 			cli();
