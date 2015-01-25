@@ -1,45 +1,44 @@
-CC=avr-gcc
-CFLAGS=-Wall -O3 -DF_CPU=$(F_CPU) -mmcu=$(MCU)
+# Chip settings
 MCU=atmega328p
 F_CPU=16000000L
 
+# Toolchain
+CC=avr-gcc
+CFLAGS=-Wall -O3 -DF_CPU=$(F_CPU) -mmcu=$(MCU)
 OBJCOPY=avr-objcopy
-BIN_FORMAT=ihex
 
-PORT=/dev/ttyACM0
+# Flashing settings
 BAUD=115200
 PROTOCOL=arduino
-PART=$(MCU)
 AVRDUDE=avrdude -F -V
+flash-u2: PORT:=/dev/ttyACM0
+flash-ftdi: PORT:=/dev/ttyUSB0
+
+# Other
+BIN_FORMAT=ihex
+RM=rm -f
 AVRSIZE=avr-size -A
 
-RM=rm -f
-
 .PHONY: all
-all: size
+all:
+	@echo "Available targets:"
+	@echo "ftdi, flash-ftdi:"
+	@echo "  For the Arduinos with an FTDI"
+	@echo "  compatible flashrom arguments: flashrom -p serprog:dev=/dev/ttyUSB0:2000000"
+	@echo "  Other boards using an hardware USB<->Serial converter might work too."
+	@echo "u2, flash-u2:"
+	@echo "  For the Arduino with a 8u2 or a 16u2"
+	@echo "  compatible flashrom arguments: flashrom -p serprog:dev=/dev/ttyACM0:115200"
 
-bin/serprog.hex: bin/serprog.elf
-	$(OBJCOPY) -O $(BIN_FORMAT) -R .eeprom $< $@
+%:
+	mkdir -p bin/
+	$(CC) $(CFLAGS) -Iconfig/$@/ -S -o bin/$@.s src/serprog.c
+	$(CC) $(CFLAGS) -s -o bin/$@.elf bin/$@.s
+	$(AVRSIZE) bin/$@.elf
+	$(OBJCOPY) -O $(BIN_FORMAT) -R .eeprom bin/$@.elf bin/$@.hex
 
-bin/serprog.elf: bin/serprog.s
-	$(CC) $(CFLAGS) -s -o $@ $<
+flash-%:
+	$(AVRDUDE) -c $(PROTOCOL) -p $(MCU) -P $(PORT) -b $(BAUD) -U flash:w:bin/$(subst flash-,,$@).hex
 
-bin/serprog.s: src/serprog.c
-	$(CC) $(CFLAGS) -S -o $@ $<
-
-src/serprog.c: bin
-
-bin:
-	mkdir bin/
-
-.PHONY: clean
 clean:
-	$(RM) bin/serprog.elf bin/serprog.hex bin/serprog.s
-
-.PHONY: upload
-upload: bin/serprog.hex
-	$(AVRDUDE) -c $(PROTOCOL) -p $(PART) -P $(PORT) -b $(BAUD) -U flash:w:$<
-
-.PHONY: size
-size: bin/serprog.elf
-	$(AVRSIZE) $<
+	$(RM) -rf bin/*
