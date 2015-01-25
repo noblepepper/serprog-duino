@@ -19,57 +19,8 @@
 #include <string.h>
 #include <avr/interrupt.h>
 #include <stdlib.h>
-
-#define S_ACK 0x06
-#define S_NAK 0x15
-
-#define S_CMD_NOP          0x00UL /* No operation                                 */
-#define S_CMD_Q_IFACE      0x01UL /* Query interface version                      */
-#define S_CMD_Q_CMDMAP     0x02UL /* Query supported commands bitmap              */
-#define S_CMD_Q_PGMNAME    0x03UL /* Query programmer name                        */
-#define S_CMD_Q_SERBUF     0x04UL /* Query Serial Buffer Size                     */
-#define S_CMD_Q_BUSTYPE    0x05UL /* Query supported bustypes                     */
-#define S_CMD_Q_CHIPSIZE   0x06UL /* Query supported chipsize (2^n format)        */
-#define S_CMD_Q_OPBUF      0x07UL /* Query operation buffer size                  */
-
-#define S_CMD_Q_WRNMAXLEN  0x08UL /* Query Write to opbuf: Write-N maximum length */
-#define S_CMD_R_BYTE       0x09UL /* Read a single byte                           */
-#define S_CMD_R_NBYTES     0x0AUL /* Read n bytes                                 */
-#define S_CMD_O_INIT       0x0BUL /* Initialize operation buffer                  */
-#define S_CMD_O_WRITEB     0x0CUL /* Write opbuf: Write byte with address         */
-#define S_CMD_O_WRITEN     0x0DUL /* Write to opbuf: Write-N                      */
-#define S_CMD_O_DELAY      0x0EUL /* Write opbuf: udelay                          */
-#define S_CMD_O_EXEC       0x0FUL /* Execute operation buffer                     */
-
-#define S_CMD_SYNCNOP      0x10UL /* Special no-operation that returns NAK+ACK    */
-#define S_CMD_Q_RDNMAXLEN  0x11UL /* Query read-n maximum length                  */
-#define S_CMD_S_BUSTYPE    0x12UL /* Set used bustype(s).                         */
-#define S_CMD_O_SPIOP      0x13UL /* Perform SPI operation.                       */
-
-#define SPI_PORT PORTB
-#define SCK PORTB5 /* port 13 */
-#define MISO PORTB4 /* port 12 */
-#define MOSI PORTB3 /* port 11 */
-#define SS PORTB2 /* port 10 */
-#define DDR_SPI DDRB
-
-#define S_IFACE_VERSION		0x01		/* Version of the protocol */
-#define S_PGM_NAME		"serprog-duino" /* The program's name */
-#define S_SPEED			57600		/* Serial speed */
-
-/* 
- * we must split in 3 parts because else avr-gcc doesn't seem to
- *  be able to compute stuff like 1<<S_CMD_SYNCNOP (it returns 0)
- */
-#define SUPPORTED_COMMANDS_LOW ( ( \
-	(1<<S_CMD_NOP) | (1<<S_CMD_Q_IFACE) | (1<<S_CMD_Q_CMDMAP) \
-	| (1<<S_CMD_Q_PGMNAME) | (1<<S_CMD_Q_SERBUF) | (1<<S_CMD_Q_BUSTYPE) \
-        ) & 0xff)
-#define SUPPORTED_COMMANDS_HIGH ( ( ( \
-	(1<<(S_CMD_SYNCNOP - 16)) | (1<<(S_CMD_O_SPIOP - 16)) | (1<<(S_CMD_S_BUSTYPE - 16)) \
-	) & 0xff ) )
-
-#define SUPPORTED_BUS 0x08
+#include "protocol.h"
+#include "settings.h"
 
 void setup_uart( unsigned long bauds )
 {
@@ -268,12 +219,14 @@ ISR(USART_RX_vect)
 
 int main (void)
 {
-	setup_uart(2000000);
+	setup_uart(S_SPEED);
 	setup_spi();
-	sei(); /* enable interupts */
+	sei();
 
-	while (1)
+	for(;;)
 	{
+		/* We're now interrupt driven */
 	}
-	return 1;
+
+	return 1; /* Should not happen */
 }
