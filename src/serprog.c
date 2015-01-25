@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include "protocol.h"
 #include "settings.h"
+#include "../config/user_settings.h"
 
 void setup_uart( unsigned long bauds )
 {

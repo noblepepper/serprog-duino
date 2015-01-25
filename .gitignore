@@ -1,4 +1,1 @@
-serprog.elf
-serprog.hex
-serprog.s
-
+bin/*

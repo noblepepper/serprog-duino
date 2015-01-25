@@ -18,26 +18,28 @@ RM=rm -f
 .PHONY: all
 all: size
 
-serprog.hex: serprog.elf
+bin/serprog.hex: bin/serprog.elf
+	$(OBJCOPY) -O $(BIN_FORMAT) -R .eeprom $< $@
 
-serprog.elf: serprog.s
+bin/serprog.elf: bin/serprog.s
+	$(CC) $(CFLAGS) -s -o $@ $<
 
-serprog.s: serprog.c
+bin/serprog.s: src/serprog.c
+	$(CC) $(CFLAGS) -S -o $@ $<
+
+src/serprog.c: bin
+
+bin:
+	mkdir bin/
 
 .PHONY: clean
 clean:
-	$(RM) serprog.elf serprog.hex serprog.s
+	$(RM) bin/serprog.elf bin/serprog.hex bin/serprog.s
 
 .PHONY: upload
-upload: serprog.hex
+upload: bin/serprog.hex
 	$(AVRDUDE) -c $(PROTOCOL) -p $(PART) -P $(PORT) -b $(BAUD) -U flash:w:$<
 
 .PHONY: size
-size: serprog.elf
+size: bin/serprog.elf
 	$(AVRSIZE) $<
-
-%.elf: %.s ; $(CC) $(CFLAGS) -s -o $@ $<
-
-%.s: %.c ; $(CC) $(CFLAGS) -S -o $@ $<
-
-%.hex: %.elf ; $(OBJCOPY) -O $(BIN_FORMAT) -R .eeprom $< $@
