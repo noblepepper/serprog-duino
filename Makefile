@@ -8,11 +8,12 @@ CFLAGS=-Wall -O3 -DF_CPU=$(F_CPU) -mmcu=$(MCU)
 OBJCOPY=avr-objcopy
 
 # Flashing settings
-BAUD=115200
 PROTOCOL=arduino
 AVRDUDE=avrdude -F -V
 flash-u2: PORT:=/dev/ttyACM0
+flash-u2: BAUD=115200
 flash-ftdi: PORT:=/dev/ttyUSB0
+flash-ftdi: BAUD=57600
 
 # Other
 BIN_FORMAT=ihex
